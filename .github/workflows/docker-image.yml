@@ -22,5 +22,5 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6.7.0
         with:
-          tags: mathesukkj/teste.ci:${{ github.run_id }}
+          tags: mathesukkj/hello-go:${{ github.run_id }}
           push: true
