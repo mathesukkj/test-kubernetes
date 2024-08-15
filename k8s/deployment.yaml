@@ -16,9 +16,30 @@ spec:
     spec:
       containers:
         - name: goserver
-          image: "mathesukkj/hello-go:v4"
-          env:
-            - name: NAME
-              value: "matheus"
-            - name: AGE
-              value: "18"
+          image: "mathesukkj/hello-go:v7"
+          envFrom:
+            - configMapRef:
+                name: goserver-env
+            - secretRef:
+                name: goserver-secret
+          volumeMounts:
+            - mountPath: "/go"
+              name: config
+      volumes:
+        - name: config
+          configMap:
+            name: configmap-dynamic
+            items:
+              - key: vars
+                path: ".env"
+          # env:
+            # - name: NAME
+            #   valueFrom:
+            #     configMapKeyRef:
+            #       name: goserver-env
+            #       key: NAME
+            # - name: AGE
+            #   valueFrom:
+            #     configMapKeyRef:
+            #       name: goserver-env
+            #       key: AGE
