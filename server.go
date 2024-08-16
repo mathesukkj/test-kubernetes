@@ -4,12 +4,16 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 )
+
+var startedAt = time.Now()
 
 func main() {
 	http.HandleFunc("/", Hello)
 	http.HandleFunc("/config-map", ConfigMap)
 	http.HandleFunc("/secret", Secret)
+	http.HandleFunc("/healthz", HealthCheck)
 	http.ListenAndServe(":8000", nil)
 }
 
@@ -33,4 +37,17 @@ func Secret(w http.ResponseWriter, r *http.Request) {
 	pw := os.Getenv("PASSWORD")
 
 	fmt.Fprintf(w, "Hi! I'm %s and pw is %s", user, pw)
+}
+
+func HealthCheck(w http.ResponseWriter, r *http.Request) {
+	duration := time.Since(startedAt)
+
+	if duration.Seconds() < 10 || duration.Seconds() > 30 {
+		w.WriteHeader(500)
+		w.Write([]byte(fmt.Sprintf("duration: %v", duration.Seconds())))
+		return
+	}
+
+	w.WriteHeader(200)
+	w.Write([]byte("ok"))
 }

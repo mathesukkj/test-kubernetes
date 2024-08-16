@@ -5,7 +5,7 @@ metadata:
   labels:
     app: goserver
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: goserver
@@ -16,7 +16,29 @@ spec:
     spec:
       containers:
         - name: goserver
-          image: "mathesukkj/hello-go:v7"
+          image: "mathesukkj/hello-go:v10"
+
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            periodSeconds: 3
+            failureThreshold: 20
+
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            periodSeconds: 3
+            failureThreshold: 1
+
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            periodSeconds: 5
+            failureThreshold: 1
+
           envFrom:
             - configMapRef:
                 name: goserver-env
@@ -25,6 +47,7 @@ spec:
           volumeMounts:
             - mountPath: "/go"
               name: config
+
       volumes:
         - name: config
           configMap:
@@ -32,14 +55,3 @@ spec:
             items:
               - key: vars
                 path: ".env"
-          # env:
-            # - name: NAME
-            #   valueFrom:
-            #     configMapKeyRef:
-            #       name: goserver-env
-            #       key: NAME
-            # - name: AGE
-            #   valueFrom:
-            #     configMapKeyRef:
-            #       name: goserver-env
-            #       key: AGE
