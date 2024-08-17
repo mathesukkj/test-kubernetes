@@ -53,14 +53,12 @@ spec:
                 name: goserver-env
             - secretRef:
                 name: goserver-secret
+
           volumeMounts:
-            - mountPath: "/go"
-              name: config
+            - mountPath: "/go/pvc"
+              name: goserver-volume
 
       volumes: # cria um volume dentro das maquinas
-        - name: config
-          configMap:
-            name: configmap-dynamic
-            items:
-              - key: vars
-                path: ".env"
+        - name: goserver-volume
+          persistentVolumeClaim:
+            claimName: goserver-pvc
