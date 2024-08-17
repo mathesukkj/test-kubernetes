@@ -16,30 +16,39 @@ spec:
     spec:
       containers:
         - name: goserver
-          image: "mathesukkj/hello-go:v10"
+          image: "mathesukkj/hello-go:v11"
 
-          startupProbe:
+          # nao da p saber esses valores sem monitoring/stress tests
+          resources: 
+            requests: # minimo de recursos p rodar
+              cpu: 50m # millicores
+              memory: 20Mi # megabits
+            limits: # maximo de recursos q podem ser usados
+              cpu: 50m 
+              memory: 25Mi
+
+          startupProbe: # os outros probes só iniciam apos o startup dar o OK
             httpGet:
               path: /healthz
               port: 8000
             periodSeconds: 3
-            failureThreshold: 20
+            failureThreshold: 20 # tanka ate 20 erros, 1 a cada 3 segundos. mas no primeiro success ele ja da o OK (configuravel)
 
-          readinessProbe:
+          readinessProbe: # checa se o container esta Ready. caso nao, ele desvia o trafego
             httpGet:
               path: /healthz
               port: 8000
             periodSeconds: 3
             failureThreshold: 1
 
-          livenessProbe:
+          livenessProbe: # checa se o container esta vivo. caso nao, ele restarta
             httpGet:
               path: /healthz
               port: 8000
             periodSeconds: 5
             failureThreshold: 1
 
-          envFrom:
+          envFrom: # pega a env de arquivos externos
             - configMapRef:
                 name: goserver-env
             - secretRef:
@@ -48,7 +57,7 @@ spec:
             - mountPath: "/go"
               name: config
 
-      volumes:
+      volumes: # cria um volume dentro das maquinas
         - name: config
           configMap:
             name: configmap-dynamic
